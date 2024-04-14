@@ -1,0 +1,54 @@
+const quality = process.argv[3]
+var q, l, r
+
+
+if (quality == '360p') {
+  q = '18'
+  l = '.mp4'
+  r = 'video'
+}
+else if (quality == '720p') {
+  q = '22'
+  l = '.mp4'
+  r = 'video'
+}
+else if (quality == '1080p') {
+  q = '37'
+  l = '.mp4'
+  r = 'video'
+}
+else if (quality == 'm4a') {
+  q = '140'
+  l = '.m4a'
+  r = 'audio'
+}
+
+
+ytdl.getInfo(videoURL).then(info => {
+  
+  const name = info.videoDetails.title.replace(/[^\w\s]/gi, '') + l
+  const format = ytdl.chooseFormat(info.formats, { quality: q })
+  const down = ytdl(videoURL, { format: format })
+  const writee = fs.createWriteStream(path.join('..', r, name))
+
+
+  let progres = 0
+  down.on('progress', (chunkLength, downloadedBytes, totalBytes) => {
+    progres += chunkLength;
+    let percent = (progres / totalBytes) * 100;
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`Descargando ${name} => ${(progres / Math.pow(1024, 2)).toFixed(2)}/${(totalBytes / Math.pow(1024, 2)).toFixed(2)}mg ${percent.toFixed(2)}%`);
+  });
+
+  down.pipe(writee);
+  writee.on('finish', () => {
+    console.log(`\nDescarga completada`);
+  });
+
+})
+
+
+
+
+
